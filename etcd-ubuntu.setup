@@ -1,0 +1,43 @@
+sudo apt-get update
+sudo apt-get upgrade
+
+sudo apt-get install -y curl tar
+
+export ETCD_VER=v3.5.9
+curl -L https://github.com/etcd-io/etcd/releases/download/${ETCD_VER}/etcd-${ETCD_VER}-linux-amd64.tar.gz -o etcd-${ETCD_VER}-linux-amd64.tar.gz
+
+tar xzvf etcd-${ETCD_VER}-linux-amd64.tar.gz or sudo tar xzvf etcd-${ETCD_VER}-linux-amd64.tar.gz --no-same-owner
+
+
+sudo mv etcd-${ETCD_VER}-linux-amd64/etcd* /usr/local/bin/
+etcd --version
+
+sudo nano /etc/systemd/system/etcd.service
+
+[Unit]
+Description=etcd key-value store
+Documentation=https://github.com/etcd-io/etcd
+After=network.target
+
+[Service]
+ExecStart=/usr/local/bin/etcd
+Restart=always
+RestartSec=5s
+LimitNOFILE=40000
+User=root
+
+[Install]
+WantedBy=multi-user.target
+
+sudo systemctl daemon-reload
+sudo systemctl start etcd
+sudo systemctl enable etcd
+sudo systemctl status etcd
+
+etcdctl put mykey "Hello, etcd"
+etcdctl get mykey
+
+etcdctl get mykey --write-out=json
+etcdctl get "" --prefix --keys-only
+etcdctl del mykey
+etcdctl watch mykey
